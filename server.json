@@ -1,0 +1,23 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.toxicdreamsnederland/sqlpulse-mcp",
+  "title": "SQLPulse MCP",
+  "description": "Zero-LLM SQL Schema X-Ray, deterministic EXPLAIN index advisor, pre-flight migration lock gate & auto-PII masking MCP server for PostgreSQL, MySQL 8+ and SQLite.",
+  "websiteUrl": "https://sqlpulse.dynonode.com",
+  "repository": {
+    "url": "https://github.com/toxicdreamsnederland/sqlpulse-mcp",
+    "source": "github"
+  },
+  "version": "1.0.0",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "github:toxicdreamsnederland/sqlpulse-mcp",
+      "version": "1.0.0",
+      "runtimeHint": "npx",
+      "transport": {
+        "type": "stdio"
+      }
+    }
+  ]
+}
