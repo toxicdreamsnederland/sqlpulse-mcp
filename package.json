@@ -1,0 +1,48 @@
+{
+  "name": "sqlpulse-mcp",
+  "version": "1.0.0",
+  "description": "Zero-LLM SQL Schema X-Ray, Deterministic EXPLAIN Performance Advisor, Migration Lock Gate & Auto-PII Masking MCP Server for Cursor, Windsurf & Antigravity (PostgreSQL, MySQL & SQLite).",
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.5.0"
+  },
+  "bin": {
+    "sqlpulse-mcp": "./bin/sqlpulse.mjs",
+    "sqlpulse": "./bin/sqlpulse.mjs"
+  },
+  "exports": {
+    ".": "./src/index.mjs"
+  },
+  "files": [
+    "bin/",
+    "src/",
+    "README.md"
+  ],
+  "scripts": {
+    "mcp": "node ./bin/sqlpulse.mjs mcp",
+    "test": "node --test ./tests/sqlpulse.test.mjs"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "postgresql",
+    "mysql",
+    "sqlite",
+    "explain",
+    "sql-optimization",
+    "cursor",
+    "windsurf",
+    "antigravity",
+    "database-index"
+  ],
+  "dependencies": {
+    "mysql2": "^3.14.0",
+    "pg": "^8.16.0"
+  },
+  "homepage": "https://sqlpulse.dynonode.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/toxicdreamsnederland/sqlpulse-mcp.git"
+  }
+}
