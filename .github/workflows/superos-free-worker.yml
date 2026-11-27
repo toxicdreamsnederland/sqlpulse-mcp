@@ -1,0 +1,98 @@
+name: Super OS Free Compute Worker
+
+on:
+  workflow_dispatch:
+    inputs:
+      job_id:
+        description: "Super OS Job ID"
+        required: true
+        type: string
+      job_type:
+        description: "sanctum_audit | playwright_scrape | ffmpeg_render | static_site_build | node_script"
+        required: true
+        type: choice
+        default: "node_script"
+        options:
+          - sanctum_audit
+          - playwright_scrape
+          - ffmpeg_render
+          - static_site_build
+          - node_script
+      payload_b64:
+        description: "Base64 JSON payload"
+        required: false
+        default: "e30="
+        type: string
+      callback_url:
+        description: "Optionele webhook URL voor resultaat-melding"
+        required: false
+        default: ""
+        type: string
+
+jobs:
+  run_superos_job:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install FFmpeg
+        if: ${{ inputs.job_type == 'ffmpeg_render' }}
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
+      - name: Install Playwright Chromium
+        if: ${{ inputs.job_type == 'playwright_scrape' }}
+        run: npx -y playwright@latest install chromium
+
+      - name: Execute Super OS Job
+        env:
+          JOB_ID: ${{ inputs.job_id }}
+          JOB_TYPE: ${{ inputs.job_type }}
+          PAYLOAD_B64: ${{ inputs.payload_b64 }}
+        run: |
+          mkdir -p ./superos_out
+          node - <<'NODE'
+          const fs = require('fs');
+          const { execSync } = require('child_process');
+          const jobId = process.env.JOB_ID;
+          const jobType = process.env.JOB_TYPE;
+          const payload = JSON.parse(Buffer.from(process.env.PAYLOAD_B64 || 'e30=', 'base64').toString('utf8'));
+          const result = { ok: true, jobId, jobType, finishedAt: new Date().toISOString(), costEur: 0 };
+          if (jobType === 'node_script' && payload.code) {
+            fs.writeFileSync('/tmp/job.mjs', String(payload.code), 'utf8');
+            result.stdout = execSync('node /tmp/job.mjs', { encoding: 'utf8', timeout: 300000 });
+          } else if (jobType === 'ffmpeg_render' && payload.ffmpegArgs) {
+            result.stdout = execSync(`ffmpeg -y ${String(payload.ffmpegArgs)}`, { encoding: 'utf8', timeout: 600000 });
+          } else if (jobType === 'static_site_build' && payload.buildCmd) {
+            result.stdout = execSync(String(payload.buildCmd), { encoding: 'utf8', timeout: 300000 });
+          } else if (jobType === 'sanctum_audit' && payload.auditCmd) {
+            result.stdout = execSync(String(payload.auditCmd), { encoding: 'utf8', timeout: 300000 });
+          } else {
+            result.payloadEcho = payload;
+          }
+          fs.writeFileSync(`./superos_out/${jobId}_result.json`, JSON.stringify(result, null, 2));
+          NODE
+
+      - name: Upload Result Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: superos-result-${{ inputs.job_id }}
+          path: ./superos_out/
+          retention-days: 3
+
+      - name: Optional Callback Notification
+        if: ${{ inputs.callback_url != '' }}
+        env:
+          CALLBACK_URL: ${{ inputs.callback_url }}
+          JOB_ID: ${{ inputs.job_id }}
+          JOB_TYPE: ${{ inputs.job_type }}
+        run: |
+          curl -sS -X POST "$CALLBACK_URL" \
+            -H "Content-Type: application/json" \
+            -d "{\"ok\":true,\"provider\":\"github_actions_cpu_runners\",\"jobId\":\"$JOB_ID\",\"jobType\":\"$JOB_TYPE\"}" || true
