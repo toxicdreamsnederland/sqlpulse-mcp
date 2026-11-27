@@ -42,9 +42,30 @@ function buildIdeConfigSnippet(dsn, licenseKey) {
   };
 }
 
+const HELP_TEXT = `SQLPulse MCP v1.0.0 — Zero-LLM SQL Schema & Query Performance MCP Server
+
+Commando's:
+  sqlpulse mcp [--dsn <dsn>]                     Start MCP stdio server voor Cursor, Windsurf & Antigravity
+  sqlpulse init-ide [--dsn <dsn>]                Genereer .cursor/mcp.json / mcp_config.json snippet
+  sqlpulse audit --dsn <dsn>                     Voer volledige DBA schema & index audit uit
+  sqlpulse explain --dsn <dsn> --sql "SELECT.."  Analyseer query uitvoeringsplan & ESR index advies
+  sqlpulse lint-migration <migration.sql>        CI/CD pre-flight controle op tabel-locks & dataverlies
+  sqlpulse license-status                        Controleer actieve licentie & harde tier-caps
+`;
+
 async function main() {
   const args = parseCliArgs(process.argv.slice(2));
   const sub = args._[0] || "mcp";
+
+  if (args.version || args.v || sub === "version") {
+    console.log("1.0.0");
+    return;
+  }
+
+  if (args.help || args.h || sub === "help") {
+    console.log(HELP_TEXT);
+    return;
+  }
 
   if (sub === "mcp") {
     const profiles = args.dsn ? { default: args.dsn } : undefined;
@@ -106,16 +127,7 @@ async function main() {
     process.exit(report.safeToDeploy ? 0 : 2);
   }
 
-  console.log(`SQLPulse MCP v1.0.0 — Zero-LLM SQL Schema & Query Performance MCP Server
-
-Commando's:
-  sqlpulse mcp [--dsn <dsn>]                     Start MCP stdio server voor Cursor, Windsurf & Antigravity
-  sqlpulse init-ide [--dsn <dsn>]                Genereer .cursor/mcp.json / mcp_config.json snippet
-  sqlpulse audit --dsn <dsn>                     Voer volledige DBA schema & index audit uit
-  sqlpulse explain --dsn <dsn> --sql "SELECT.."  Analyseer query uitvoeringsplan & ESR index advies
-  sqlpulse lint-migration <migration.sql>        CI/CD pre-flight controle op tabel-locks & dataverlies
-  sqlpulse license-status                        Controleer actieve licentie & harde tier-caps
-`);
+  console.log(HELP_TEXT);
 }
 
 main().catch((err) => {
