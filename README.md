@@ -1,6 +1,6 @@
 # SQLPulse MCP — Zero-LLM SQL Schema & Query Performance MCP Server
 
-[![Website](https://img.shields.io/badge/Website-sqlpulse.dynonode.com-0284c7)](https://sqlpulse.dynonode.com)
+[![Website](https://img.shields.io/badge/Website-sqlpulse.dynonode.com-10b981)](https://sqlpulse.dynonode.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-059669.svg)](./LICENSE)
 
 **SQLPulse MCP** gives AI coding agents (**Cursor**, **Windsurf**, **Claude Code**, **Antigravity**) deterministic, read-only database visibility without hallucinated indexes, table-locking migrations, or raw PII leaks.
